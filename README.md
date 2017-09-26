@@ -36,7 +36,7 @@ $db = new DB('mysql:host='.$config['host'].';dbname='.$config['database'].';char
 
 
 
-###Error Log
+### Error Log
 
 To prevent your web application from throwing ugly error message, you can save error message into a specific log file.
 

@@ -15,7 +15,6 @@
 /**
  * DB: A very simple PDO wrapper.
  *
- * @author Sei Kan - 26/09/2017
  *
  * @version 0.0.1
  */
@@ -76,8 +75,8 @@ class DB extends PDO
 	{
 		try {
 			parent::__construct($dsn, $user, $password, [
-				PDO::ATTR_PERSISTENT => true,
-				PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+				PDO::ATTR_PERSISTENT         => true,
+				PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
 				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
 			]);
 		} catch (PDOException $e) {
@@ -101,7 +100,7 @@ class DB extends PDO
 		}
 
 		if (!is_writable($errorLog)) {
-			throw new Exception('"'.$errorLog.'" is not writable.');
+			throw new Exception('"' . $errorLog . '" is not writable.');
 		}
 		$this->errorLog = $errorLog;
 	}
@@ -128,7 +127,7 @@ class DB extends PDO
 	 */
 	public function select($table, $where = '', $binds = '', $fields = '*')
 	{
-		return $this->execute('SELECT '.$fields.' FROM `'.$table.'`'.((!empty($where)) ? ' WHERE '.$where : '').';', $binds);
+		return $this->execute('SELECT ' . $fields . ' FROM `' . $table . '`' . ((!empty($where)) ? ' WHERE ' . $where : '') . ';', $binds);
 	}
 
 	/**
@@ -137,7 +136,7 @@ class DB extends PDO
 	 * @param string $table
 	 * @param array  $data
 	 *
-	 * @return int|false
+	 * @return false|int
 	 */
 	public function insert($table, $data)
 	{
@@ -145,10 +144,10 @@ class DB extends PDO
 		$binds = [];
 
 		foreach ($fields as $field) {
-			$binds[':'.$field] = $data[$field];
+			$binds[':' . $field] = $data[$field];
 		}
 
-		return $this->execute('INSERT INTO `'.$table.'`(`'.implode('`, `', $fields).'`) VALUES(:'.implode(', :', $fields).');', $binds);
+		return $this->execute('INSERT INTO `' . $table . '`(`' . implode('`, `', $fields) . '`) VALUES(:' . implode(', :', $fields) . ');', $binds);
 	}
 
 	/**
@@ -158,11 +157,11 @@ class DB extends PDO
 	 * @param string $where
 	 * @param array  $binds
 	 *
-	 * @return int|false
+	 * @return false|int
 	 */
 	public function delete($table, $where, $binds = '')
 	{
-		return $this->execute('DELETE FROM `'.$table.'` WHERE '.$where.';', $binds);
+		return $this->execute('DELETE FROM `' . $table . '` WHERE ' . $where . ';', $binds);
 	}
 
 	/**
@@ -173,19 +172,19 @@ class DB extends PDO
 	 * @param string $where
 	 * @param array  $binds
 	 *
-	 * @return int|false
+	 * @return false|int
 	 */
 	public function update($table, $data, $where, $binds = '')
 	{
 		$fields = $this->getFields($table, $data);
 		$binds = $this->getBinds($binds);
-		$query = 'UPDATE `'.$table.'` SET ';
+		$query = 'UPDATE `' . $table . '` SET ';
 
 		foreach ($fields as $field) {
-			$query .= '`'.$field.'` = :new_'.$field.', ';
-			$binds[':new_'.$field] = $data[$field];
+			$query .= '`' . $field . '` = :new_' . $field . ', ';
+			$binds[':new_' . $field] = $data[$field];
 		}
-		$query = rtrim($query, ', ').' WHERE '.$where.';';
+		$query = rtrim($query, ', ') . ' WHERE ' . $where . ';';
 
 		return $this->execute($query, $binds);
 	}
@@ -196,9 +195,9 @@ class DB extends PDO
 	 * @param string $query
 	 * @param array  $binds
 	 *
-	 * @return int|array|false
-	 *
 	 * @throws \Exception
+	 *
+	 * @return array|false|int
 	 */
 	public function execute($query, $binds = '')
 	{
@@ -230,10 +229,10 @@ class DB extends PDO
 					gmdate('Y-m-d H:i:s'),
 					((isset($_SERVER['REMOTE_ADDR'])) ? $_SERVER['REMOTE_ADDR'] : ''),
 					(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : ''),
-					$e->getFile().':'.$e->getLine(),
+					$e->getFile() . ':' . $e->getLine(),
 					$e->getMessage(),
 					$this->getQuery(),
-				])."\n", FILE_APPEND);
+				]) . "\n", FILE_APPEND);
 			}
 
 			return false;
@@ -248,7 +247,7 @@ class DB extends PDO
 	public function getQuery()
 	{
 		return str_replace(array_keys($this->binds), array_map(function ($s) {
-			return "'".str_replace('\'', '\\\'', $s)."'";
+			return "'" . str_replace('\'', '\\\'', $s) . "'";
 		}, array_values($this->binds)), $this->query);
 	}
 
@@ -282,7 +281,7 @@ class DB extends PDO
 	 */
 	private function getFields($table, $data)
 	{
-		if (false === ($records = $this->execute('DESCRIBE `'.$table.'`'))) {
+		if (false === ($records = $this->execute('DESCRIBE `' . $table . '`'))) {
 			return [];
 		}
 

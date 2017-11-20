@@ -144,6 +144,11 @@ $user = $db->select('user', '`email_address` = :email', [
 	':email'	=> 'audrey56@live.com',
 ]);
 
+// Get multiple users
+/*$users = $db->select('user', '`user_id` IN (:ids)', [
+	':ids'	=> [1, 2],
+]);*/
+
 if ($db->rowCount() > 0) {
 	echo 'Name : ' . $user[0]['name'] . '<br />';
   	echo 'Email: ' . $user[0]['email_address'] . '<br />';

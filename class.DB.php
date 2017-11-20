@@ -12,12 +12,6 @@
  *
  * @see       https://github.com/seikan/DB
  */
-/**
- * DB: A very simple PDO wrapper.
- *
- *
- * @version 0.0.1
- */
 class DB extends PDO
 {
 	/**
@@ -75,7 +69,6 @@ class DB extends PDO
 	{
 		try {
 			parent::__construct($dsn, $user, $password, [
-				PDO::ATTR_PERSISTENT         => true,
 				PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
 				PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
 			]);
@@ -208,7 +201,7 @@ class DB extends PDO
 
 		try {
 			$st = $this->prepare($this->query);
-			if (false !== $st->execute($this->binds)) {
+			if ($st->execute($this->binds) !== false) {
 				$this->rowCount = $st->rowCount();
 
 				if (preg_match('/^(SELECT|DESCRIBE|PRAGMA|SHOW)/i', $this->query)) {
@@ -281,7 +274,7 @@ class DB extends PDO
 	 */
 	private function getFields($table, $data)
 	{
-		if (false === ($records = $this->execute('DESCRIBE `' . $table . '`'))) {
+		if (($records = $this->execute('DESCRIBE `' . $table . '`')) === false) {
 			return [];
 		}
 
@@ -305,6 +298,29 @@ class DB extends PDO
 	{
 		if (!is_array($binds)) {
 			return (!empty($binds)) ? [$binds] : [];
+		}
+
+		foreach ($binds as $key => $bind) {
+			if (is_array($bind)) {
+				$fields = '';
+				$index = 1;
+
+				foreach ($bind as $value) {
+					if (empty($value)) {
+						continue;
+					}
+
+					$binds[':bind_rbNGYyL' . $index] = $value;
+					$fields .= ':bind_rbNGYyL' . $index . ', ';
+
+					++$index;
+				}
+
+				$this->query = str_replace($key, rtrim($fields, ', '), $this->query);
+				unset($binds[$key]);
+
+				$binds = array_filter($binds);
+			}
 		}
 
 		return $binds;
